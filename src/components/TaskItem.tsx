@@ -1,26 +1,27 @@
 import { useState } from "react";
-import type { ItemProps } from "../types/task";
+import type { ItemProps, TaskStatus } from "../types/task";
 
-const TaskItem = ({ task, tasks, setTasks }: ItemProps) => {
+const TaskItem = ({ task, setTasks }: ItemProps) => {
   const [editMode, setEditMode] = useState(false);
   const [newTitle, setNewTitle] = useState(task.title);
 
+  // Delete task
   const deleteTask = () => {
     setTasks((prev) =>
       prev.filter((t) => t.id !== task.id)
     );
   };
 
-  const toggleComplete = () => {
+  // Change task status
+  const changeStatus = (status: TaskStatus) => {
     setTasks((prev) =>
       prev.map((t) =>
-        t.id === task.id
-          ? { ...t, completed: !t.completed }
-          : t
+        t.id === task.id ? { ...t, status } : t
       )
     );
   };
 
+  // Save edited title
   const saveEdit = () => {
     if (!newTitle.trim()) return;
 
@@ -45,23 +46,48 @@ const TaskItem = ({ task, tasks, setTasks }: ItemProps) => {
           }
         />
       ) : (
-        <span className={task.completed ? "done" : ""}>
+        <span
+          className={
+            task.status === "completed"
+              ? "done"
+              : ""
+          }
+        >
           {task.title}
         </span>
       )}
 
       <div className="task-actions">
-        <button onClick={toggleComplete}>✔</button>
+        {/* Status Dropdown */}
+        <select
+          className="status-dropdown"
+          value={task.status}
+          onChange={(e) =>
+            changeStatus(e.target.value as TaskStatus)
+          }
+        >
+          <option value="todo">Todo</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
 
+        {/* Edit / Save Button */}
         {editMode ? (
-          <button onClick={saveEdit}>Save</button>
+          <button onClick={saveEdit}>
+            Save
+          </button>
         ) : (
-          <button onClick={() => setEditMode(true)}>
+          <button
+            onClick={() => setEditMode(true)}
+          >
             Edit
           </button>
         )}
 
-        <button onClick={deleteTask}>❌</button>
+        {/* Delete Button */}
+        <button onClick={deleteTask}>
+          ❌
+        </button>
       </div>
     </div>
   );

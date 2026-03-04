@@ -1,13 +1,9 @@
+export type TaskStatus = "todo" | "in-progress" | "completed";
+
 export interface Task {
   id: number;
   title: string;
-  completed: boolean;
-}
-
-export interface ItemProps {
-  task: Task;
-  tasks: Task[];
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  status: TaskStatus;
 }
 
 export interface ThemeProps {
@@ -20,5 +16,9 @@ export interface FormProps {
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
-export type FilterType = "all" | "active" | "completed";
+export interface ItemProps extends FormProps {
+  task: Task;
+}
+
+export type FilterType = "all" | TaskStatus;
  

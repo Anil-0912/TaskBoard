@@ -8,10 +8,10 @@ const TaskForm = ({ tasks, setTasks }: FormProps) => {
     if (!title.trim()) return;
 
     const newTask: Task = {
-      id: Date.now(),
-      title: title.trim(),
-      completed: false,
-    };
+  id: Date.now(),
+  title,
+  status: "todo", 
+};
 
     setTasks((prev) => [...prev, newTask]);
     setTitle("");

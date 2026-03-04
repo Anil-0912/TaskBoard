@@ -11,6 +11,7 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
   const [debouncedSearch, setDebouncedSearch] =
     useState("");
 
+  // Debounce logic
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -19,13 +20,14 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Filter + Search Logic
   const filteredTasks = tasks.filter((task) => {
-    if (filter === "active" && task.completed)
+    // Filter by status
+    if (filter !== "all" && task.status !== filter) {
       return false;
+    }
 
-    if (filter === "completed" && !task.completed)
-      return false;
-
+    // Search filter
     if (
       debouncedSearch &&
       !task.title
@@ -41,8 +43,10 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
   return (
     <div className="container">
       <div className="dashboard-card">
+        {/* Task Form */}
         <TaskForm tasks={tasks} setTasks={setTasks} />
 
+        {/* Search + Filter Controls */}
         <div className="top-controls">
           <input
             className="search-box"
@@ -55,7 +59,7 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
           />
 
           <div className="filter-box">
-            {["all", "active", "completed"].map(
+            {["all", "todo", "in-progress", "completed"].map(
               (item) => (
                 <button
                   key={item}
@@ -75,6 +79,7 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
           </div>
         </div>
 
+        {/* Clear All Button */}
         {tasks.length > 0 && (
           <div className="clear-box">
             <button onClick={() => setTasks([])}>
@@ -83,6 +88,7 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
           </div>
         )}
 
+        {/* Task List */}
         <TaskList
           tasks={filteredTasks}
           setTasks={setTasks}
