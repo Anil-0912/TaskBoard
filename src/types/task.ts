@@ -4,7 +4,7 @@ export interface Task {
   id: number;
   title: string;
   status: TaskStatus;
-  assignedAt: string;   
+  assignedAt: string;
   dueDate: string;
 }
 
@@ -18,9 +18,10 @@ export interface FormProps {
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
-export interface ItemProps extends FormProps {
+export interface ItemProps {
   task: Task;
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
 export type FilterType = "all" | TaskStatus;
- 
+

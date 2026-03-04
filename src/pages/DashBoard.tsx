@@ -2,16 +2,27 @@ import { useEffect, useState } from "react";
 import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
 import type { FilterType, FormProps } from "../types/task";
+import { getTasks, deleteTask } from "../api/taskApi";
 
 const Dashboard = ({ tasks, setTasks }: FormProps) => {
-  const [filter, setFilter] =
-    useState<FilterType>("all");
-
+  const [filter, setFilter] = useState<FilterType>("all");
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] =
-    useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Debounce logic
+  // Fetch tasks from backend
+  useEffect(() => {
+    const user = JSON.parse(
+      localStorage.getItem("loggedInUser") || "{}"
+    );
+
+    if (!user.id) return;
+
+    getTasks(user.id).then((res) => {
+      setTasks(res.data);
+    });
+  }, []);
+
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -20,14 +31,12 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Filter + Search Logic
+  // Filter + search logic
   const filteredTasks = tasks.filter((task) => {
-    // Filter by status
     if (filter !== "all" && task.status !== filter) {
       return false;
     }
 
-    // Search filter
     if (
       debouncedSearch &&
       !task.title
@@ -43,19 +52,16 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
   return (
     <div className="container">
       <div className="dashboard-card">
-        {/* Task Form */}
+
         <TaskForm tasks={tasks} setTasks={setTasks} />
 
-        {/* Search + Filter Controls */}
         <div className="top-controls">
           <input
             className="search-box"
             type="text"
             placeholder="Search tasks..."
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
           />
 
           <div className="filter-box">
@@ -67,9 +73,7 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
                     setFilter(item as FilterType)
                   }
                   className={
-                    filter === item
-                      ? "active-filter"
-                      : ""
+                    filter === item ? "active-filter" : ""
                   }
                 >
                   {item}
@@ -79,20 +83,26 @@ const Dashboard = ({ tasks, setTasks }: FormProps) => {
           </div>
         </div>
 
-        {/* Clear All Button */}
         {tasks.length > 0 && (
           <div className="clear-box">
-            <button onClick={() => setTasks([])}>
+            <button
+              onClick={async () => {
+                for (const task of tasks) {
+                  await deleteTask(task.id);
+                }
+                setTasks([]);
+              }}
+            >
               Clear All
             </button>
           </div>
         )}
 
-        {/* Task List */}
         <TaskList
           tasks={filteredTasks}
           setTasks={setTasks}
         />
+
       </div>
     </div>
   );

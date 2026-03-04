@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api/taskApi";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ const Login = () => {
         if (loggedUser) {
             navigate("/dashboard");
         }
-    }, []);
+    }, [navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -24,25 +25,25 @@ const Login = () => {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const users = JSON.parse(localStorage.getItem("users") || "[]");
+        try {
+            const res = await loginUser(formData);
 
-        const validUser = users.find(
-            (u: any) =>
-                u.email === formData.email &&
-                u.password === formData.password
-        );
+            localStorage.setItem("loggedInUser", JSON.stringify(res.data));
 
-        if (!validUser) {
-            alert("Invalid email or password");
-            return;
+            navigate("/dashboard");
+
+        } catch (error: any) {
+
+            if (error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else {
+                 alert("Login failed");
+            }
+
         }
-
-        localStorage.setItem("loggedInUser", JSON.stringify(validUser));
-
-        navigate("/dashboard");
     };
 
     return (

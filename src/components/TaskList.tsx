@@ -1,5 +1,5 @@
-import TaskItem from "./TaskItem";
 import type { FormProps } from "../types/task";
+import TaskItem from "./TaskItem";
 
 const TaskList = ({ tasks, setTasks }: FormProps) => {
   if (tasks.length === 0) {
@@ -12,7 +12,6 @@ const TaskList = ({ tasks, setTasks }: FormProps) => {
         <TaskItem
           key={task.id}
           task={task}
-          tasks={tasks}
           setTasks={setTasks}
         />
       ))}

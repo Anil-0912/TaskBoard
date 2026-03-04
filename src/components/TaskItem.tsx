@@ -1,36 +1,65 @@
 import { useState } from "react";
 import type { ItemProps, TaskStatus } from "../types/task";
+import { deleteTask, updateTask } from "../api/taskApi";
 
 const TaskItem = ({ task, setTasks }: ItemProps) => {
   const [editMode, setEditMode] = useState(false);
   const [newTitle, setNewTitle] = useState(task.title);
 
-  const deleteTask = () => {
-    setTasks((prev) =>
-      prev.filter((t) => t.id !== task.id)
-    );
+  // Delete task
+  const removeTask = async () => {
+    try {
+      await deleteTask(task.id);
+
+      setTasks((prev) =>
+        prev.filter((t) => t.id !== task.id)
+      );
+    } catch (error) {
+      console.error("Delete failed", error);
+    }
   };
 
-  const changeStatus = (status: TaskStatus) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === task.id ? { ...t, status } : t
-      )
-    );
+  // Change status
+  const changeStatus = async (status: TaskStatus) => {
+    try {
+      const updated = { ...task, status };
+
+      await updateTask(task.id, updated);
+
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === task.id ? { ...t, status } : t
+        )
+      );
+    } catch (error) {
+      console.error("Status update failed", error);
+    }
   };
 
-  const saveEdit = () => {
+  // Save edited title
+  const saveEdit = async () => {
     if (!newTitle.trim()) return;
 
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === task.id
-          ? { ...t, title: newTitle.trim() }
-          : t
-      )
-    );
+    try {
+      const updated = {
+        ...task,
+        title: newTitle.trim(),
+      };
 
-    setEditMode(false);
+      await updateTask(task.id, updated);
+
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === task.id
+            ? { ...t, title: newTitle.trim() }
+            : t
+        )
+      );
+
+      setEditMode(false);
+    } catch (error) {
+      console.error("Edit failed", error);
+    }
   };
 
   return (
@@ -99,7 +128,7 @@ const TaskItem = ({ task, setTasks }: ItemProps) => {
           </button>
         )}
 
-        <button onClick={deleteTask}>
+        <button onClick={removeTask}>
           ❌
         </button>
       </div>

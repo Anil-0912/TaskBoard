@@ -1,57 +1,65 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "../api/taskApi";
 
 const Register = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [formData, setFormData] = useState({
-        username: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (formData.password !== formData.confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  try {
+    await registerUser({
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
+    console.log(formData);
+    alert("Registration successful");
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    setFormData({
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+    
 
-        if (formData.password !== formData.confirmPassword) {
-            alert("Passwords do not match");
-            return;
-        }
+    navigate("/");
 
-        const users = JSON.parse(localStorage.getItem("users") || "[]");
+  } catch (error: any) {
 
-        const userExists = users.find(
-            (u: any) => u.email === formData.email
-        );
+    if (error.response?.data?.message) {
+      alert(error.response.data.message);
+    } else {
+      alert("Registration failed");
+    }
 
-        if (userExists) {
-            alert("User already registered");
-            return;
-        }
+  }
+};
 
-        users.push({
-            username: formData.username,
-            email: formData.email,
-            password: formData.password,
-        });
-
-        localStorage.setItem("users", JSON.stringify(users));
-
-        alert("Registration successful");
-
-        navigate("/");
-    };
-
-    return (
-        <div className="auth-container">
+  return (
+    <div className="auth-container">
             <div className="auth-card">
                 <h2>Create Account</h2>
 
@@ -106,7 +114,7 @@ const Register = () => {
                 </p>
             </div>
         </div>
-    );
+  );
 };
 
 export default Register;

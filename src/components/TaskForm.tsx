@@ -1,27 +1,42 @@
 import { useState } from "react";
-import type { FormProps, Task } from "../types/task";
+import type { FormProps } from "../types/task";
+import { createTask } from "../api/taskApi";
 
 const TaskForm = ({ setTasks }: FormProps) => {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
 
-  const addTask = (e: React.FormEvent<HTMLFormElement>) => {
+  const addTask = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!title.trim()) return;
 
-    const newTask: Task = {
-      id: Date.now(),
+    const user = JSON.parse(
+      localStorage.getItem("loggedInUser") || "{}"
+    );
+
+    const newTask = {
       title: title.trim(),
       status: "todo",
-      assignedAt: new Date().toISOString(),
-      dueDate,
+      assignedAt: new Date().toISOString().split("T")[0],
+      dueDate: dueDate || null,
+      user: {
+        id: user.id,
+      },
     };
 
-    setTasks((prev) => [...prev, newTask]);
+    try {
+      const res = await createTask(newTask);
 
-    setTitle("");
-    setDueDate("");
+      // update UI with backend response
+      setTasks((prev) => [...prev, res.data]);
+
+      setTitle("");
+      setDueDate("");
+
+    } catch (error) {
+      console.error("Error creating task", error);
+    }
   };
 
   return (
